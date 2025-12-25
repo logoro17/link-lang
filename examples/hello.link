@@ -1,0 +1,10 @@
+app Hello 
+    window Main 
+        title "Hello"   # window title
+    
+
+    func greet 
+        print "Hello from Link"   # greeting
+    
+
+    connect Main.onLoad -> greet
