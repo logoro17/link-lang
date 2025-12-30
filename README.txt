@@ -48,7 +48,7 @@ Good first tasks:
 
 License
 
-MIT License. See LICENSE for details.
+MIT License. See the LICENSE file for details.
 
 -----
 
