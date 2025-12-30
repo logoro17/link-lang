@@ -18,6 +18,9 @@ private:
     const Token& peek() const;
     const Token& advance();
     bool match(TokenType type);
+    bool isBlockStart() const;
+    bool consumeBlockStart();
+    bool consumeBlockEnd();
     const Token& consume(TokenType type, const std::string& err);
 
     std::unique_ptr<Stmt> parseStatement();
