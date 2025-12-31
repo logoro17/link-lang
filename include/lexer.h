@@ -26,6 +26,7 @@ private:
 
     Token identifier();
     Token stringLiteral();
+    Token number();
 
     void handleIndentation(std::vector<Token>& tokens);
 };

@@ -24,6 +24,8 @@ enum class TokenType {
     COMMA,
     ARROW,
     DOT,
+    NUMBER,
+    EQUAL,
 
     // Literals
     IDENTIFIER,

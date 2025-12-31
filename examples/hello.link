@@ -1,10 +1,13 @@
 app Hello {
     window Main {
-        title "Hello"
+        title = "Hello"
+        size = 1      # size
+        referating = 60       # fps as refresh rate
     }
 
     func greet {
         print "Hello from Link"
+        print "Nebula OS Online."
     }
 
     connect Main.onLoad(greet)

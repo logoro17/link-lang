@@ -10,10 +10,11 @@ class Parser {
 public:
     Parser(const std::vector<Token>& tokens);
     std::unique_ptr<Program> parse();
+    std::unique_ptr<WindowDecl> parseWindow();
 
 private:
     const std::vector<Token>& tokens;
-    size_t current;
+    size_t current = 0;
 
     const Token& peek() const;
     const Token& advance();
@@ -22,10 +23,10 @@ private:
     bool consumeBlockStart();
     bool consumeBlockEnd();
     const Token& consume(TokenType type, const std::string& err);
+    PropertyCall parsePropertyCall();
 
     std::unique_ptr<Stmt> parseStatement();
     std::unique_ptr<AppDecl> parseApp();
-    std::unique_ptr<WindowDecl> parseWindow();
     std::unique_ptr<FuncDecl> parseFunc();
     std::unique_ptr<PropertyStmt> parseProperty();
     std::unique_ptr<CallStmt> parseCall();

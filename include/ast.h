@@ -31,14 +31,36 @@ struct AppDecl : public Stmt {
     }
 };
 
+struct PropertyCall {
+    std::string name;
+    std::vector<std::string> args;
+};
+
 // Window declaration
 struct WindowDecl : public Stmt {
     std::string name;
+    std::string title;
+    std::vector<PropertyCall> properties;       // <-- title, size, etc
     std::vector<std::unique_ptr<Stmt>> body;
 
     WindowDecl(const std::string& n) : name(n) {}
     void print(int indent = 0) const override {
         std::cout << std::string(indent, ' ') << "Window: " << name << "\n";
+
+        // print properties
+        for (const auto& prop : properties) {
+            std::cout << std::string(indent + 2, ' ') << "Property: " << prop.name;
+            if (!prop.args.empty()) {
+                std::cout << " = ";
+                for (size_t i = 0; i < prop.args.size(); i++) {
+                    std::cout << prop.args[i];
+                    if (i + 1 < prop.args.size()) std::cout << ", ";
+                }
+            }
+            std::cout << "\n";
+        }
+
+        // print body statements
         for (auto& stmt : body) stmt->print(indent + 2);
     }
 };
@@ -54,7 +76,7 @@ struct PropertyStmt : public Stmt {
     }
 };
 
-// The function's declaration of independence
+// We the Functions of Link, in Order to...
 struct FuncDecl : public Stmt {
     std::string name;
     std::vector<std::unique_ptr<Stmt>> body;
@@ -89,4 +111,3 @@ struct ConnectStmt : public Stmt {
         std::cout << std::string(indent, ' ') << "Connect: " << source << "." << event << " -> " << target << "\n";
     }
 };
-

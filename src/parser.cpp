@@ -26,6 +26,38 @@ bool Parser::consumeBlockEnd() {
     throw std::runtime_error("There's an expected block/bracket end (dedent or })");
 }
 
+PropertyCall Parser::parsePropertyCall() {
+    PropertyCall prop;
+
+    // property name
+    prop.name = tokens[current].value;
+    current++;
+
+    // =
+    if (tokens[current].type != TokenType::EQUAL) {
+        throw std::runtime_error(
+            "There's an expected '=' after property name at line " +
+            std::to_string(tokens[current].line)
+        );
+    }
+    current++;
+
+    // single argument (number, string, or identifier)
+    const Token& arg = tokens[current];
+    if (arg.type == TokenType::NUMBER ||
+        arg.type == TokenType::STRING ||
+        arg.type == TokenType::IDENTIFIER) {
+        prop.args.push_back(arg.value);
+    } else {
+        throw std::runtime_error(
+            "There's an invalid property argument at line " +
+            std::to_string(arg.line)
+        );
+    }
+    current++;
+
+    return prop;
+}
 
 std::unique_ptr<Program> Parser::parse() {
     auto program = std::make_unique<Program>();
@@ -93,9 +125,16 @@ std::unique_ptr<WindowDecl> Parser::parseWindow() {
     consumeBlockStart();
     auto window = std::make_unique<WindowDecl>(name);
 
-    while ((peek().type != TokenType::DEDENT) && (peek().type != TokenType::RBRACE) && !isAtEnd()) {
-        auto stmt = parseStatement();
-        if (stmt) window->body.push_back(std::move(stmt));
+    while (tokens[current].type != TokenType::RBRACE) {
+        if (tokens[current].type == TokenType::IDENTIFIER &&
+            tokens[current + 1].type == TokenType::LPAREN) {
+    
+            PropertyCall prop = parsePropertyCall();
+            window->properties.push_back(prop);
+            continue;
+        }
+    
+        current++;
     }
 
     consumeBlockEnd();

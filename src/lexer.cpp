@@ -88,6 +88,17 @@ Token Lexer::stringLiteral() {
     return Token{TokenType::STRING, value, line, startCol};
 }
 
+Token Lexer::number() {
+    int startCol = column;
+    std::string value;
+
+    while (std::isdigit(peek())) {
+        value += advance();
+    }
+
+    return Token(TokenType::NUMBER, value, line, startCol);
+}
+
 void Lexer::handleIndentation(std::vector<Token>& tokens) {
     int count = 0;
     while (peek() == ' ') {
@@ -194,6 +205,19 @@ std::vector<Token> Lexer::tokenize() {
             tokens.push_back(makeToken(TokenType::DOT));
             continue;
         }
+
+        if (std::isdigit(c)) {
+            tokens.push_back(number());
+            continue;
+        }
+
+        if (c == '=') {
+            tokens.push_back(makeToken(TokenType::EQUAL));
+            advance();
+            continue;
+        }
+
+
 
         throw std::runtime_error(
             "Unexpected character '" + std::string(1, c) +
