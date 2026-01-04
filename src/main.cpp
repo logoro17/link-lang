@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <string.h>
 #include "lexer.h"
 #include "parser.h"
 
@@ -8,11 +9,13 @@ int main(int argc, char** argv) {
         std::cerr << "Usage: link <file.link>\n";
         return 1;
     }
-
+    
     std::ifstream file(argv[1]);
     std::string source((std::istreambuf_iterator<char>(file)),
                         std::istreambuf_iterator<char>());
-
+    if(!file){
+        std::cerr << "Unable to find you're trying to run! \n";
+    }
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
