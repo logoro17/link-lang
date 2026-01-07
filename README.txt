@@ -22,11 +22,11 @@ bash
 git clone https://github.com/Pilot0253/link-lang.git
 cd link-lang
 
-2. Build Link (Linux example):
+2. Build Link (G++):
 
 g++ src/*.cpp -I include -o link
 
-(Window build instructions will be added later)
+(Other build instructions for different compilers will be added later)
 
 3. Run an example
 
