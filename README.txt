@@ -1,4 +1,4 @@
-LINK
+LINK Generally Are Optimized to ARMv8 arch Device
 
 Link is an experimental scripting language for Nebula OS, designed to create apps, GUIs, and handle package management.
 This is a v0.x dev build. Early, minimal, and primarily for contributors and testing.
