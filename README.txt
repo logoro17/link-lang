@@ -19,7 +19,7 @@ Getting started
 1. Clone this repo:
 
 bash
-git clone https://github.com/logoro17/link-lang.git
+git clone https://github.com/Pilot0253/link-lang.git
 cd link-lang
 
 2. Build Link (G++):
