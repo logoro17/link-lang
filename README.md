@@ -8,7 +8,7 @@
 
 ---------------------------------------------------------------------------
 Creator   : Pilot0253
-Developer : Lowis Roy Figo
+Developer : logoro17 // LoRoGo17
 PROJECT   : LinkLang (Interpreter)
 LANGUAGE  : C++ / Python
 OS        : Kali Linux / Android (Custom Kernel)
