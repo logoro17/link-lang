@@ -1,0 +1,19 @@
+# Tmp Clearing Scripts
+set target = "dump.tmp"
+
+# 1. Make Dummy Files
+io.write(target, "This is only a test")
+print("File Created: " + target)
+
+# 2. Checking
+if io.exists(target)
+    print("File Found! Purging...\n")
+    io.remove(target)
+else
+    print("File Not Found.")
+
+# 3. Cek lagi
+if io.exists(target)
+    print("Erase Failed.")
+else
+    print("Success! File has been deleted.")

@@ -1,0 +1,10 @@
+# Test Parsing Array
+set myList = [10, 20, 30]
+
+# Test Parsing Indexing
+set item = myList[0]
+
+# Test Nested
+set matrix = [[1, 2], [3, 4]]
+
+print("Parsing Done!")

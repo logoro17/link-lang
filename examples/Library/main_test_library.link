@@ -1,0 +1,27 @@
+print("=== SYSTEM MODULARITY TEST ===")
+
+# 1. Calls the library file
+import "math-tools.link"
+
+print(">> Libary has been success imported.")
+
+# 2. Variabel from Library test
+print("PI value from Library: " + PI)
+
+# 3. Return Func Testing
+print("\n[+] Testing Math Return:")
+set num = 5
+set result_squareroot = squareroot(num)
+print("   Squareroot of 5 is : " + result_squareroot)
+
+# 4. Complex Func Testing
+set radius = 10
+set area = circle_area(radius)
+print("   Circle Area (r=10): " + area)
+
+# 5. String Return Function
+print("\n[+] Testing String Return:")
+set msg = member_greet("Hello All...")
+print("   Message: " + msg)
+
+print("\n=== TEST FINISHED ===")

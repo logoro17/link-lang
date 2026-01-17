@@ -1,0 +1,20 @@
+# Kernel Checking
+set kernel = os.exec("uname -r")
+print("Kernel Version: " + kernel)
+
+# User Check
+set sysinfo = os.exec("uname -a")
+
+if str.contains(sysinfo, "Linux")
+    print("Sistem terdeteksi: LINUX")
+    
+    # Cek user
+    set user = os.exec("whoami")
+    print("Current User: " + user)
+else
+    print("Bukan Linux?")
+
+# Measure Len Text
+set text = "Link Lang"
+print("Panjang " + text + " adalah:")
+print(str.len(text))

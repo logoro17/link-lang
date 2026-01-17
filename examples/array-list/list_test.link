@@ -1,0 +1,23 @@
+# 1. List Declaration
+set packages = ["vim", "git", "gcc"]
+print("Initial Package:")
+print(packages)
+
+# 2. Index Access
+print("First Package: " + packages[0])
+
+# 3. Adding Item (list.add)
+list.add(packages, "curl")
+print("After Adding:")
+print(packages)
+
+# 4. List measurement (len)
+print("List Item :")
+print(len(packages))
+
+# 5. Nested List
+set matrix = [[1, 2], [3, 4]]
+print("Matrix:")
+print(matrix)
+print("Matrix[0]:")
+print(matrix[0])

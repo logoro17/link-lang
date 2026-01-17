@@ -4,19 +4,15 @@
 #include <memory>
 #include <iostream>
 
-// --- Math Expression ---
 struct Expr {
     virtual ~Expr() = default;
-    virtual void print() const = 0; // Fungsi print virtual
+    virtual void print() const = 0;
 };
 
 struct InputExpr : public Expr {
     std::string prompt;
     InputExpr(std::string p) : prompt(p) {}
-    
-    void print() const override { 
-        std::cout << "input(\"" << prompt << "\")"; 
-    }
+    void print() const override { std::cout << "input(\"" << prompt << "\")"; }
 };
 
 struct NumberExpr : public Expr {
@@ -25,38 +21,109 @@ struct NumberExpr : public Expr {
     void print() const override { std::cout << value; }
 };
 
-struct VariableExpr : public Expr {
-    std::string name;
-    VariableExpr(std::string n) : name(n) {}
-    void print() const override { std::cout << name; }
-};
-
-// [NEW] Float
 struct FloatExpr : public Expr {
     double value;
     FloatExpr(double v) : value(v) {}
     void print() const override { std::cout << value; }
 };
 
-// [NEW] String
 struct StringExpr : public Expr {
     std::string value;
     StringExpr(std::string v) : value(v) {}
     void print() const override { std::cout << "\"" << value << "\""; }
 };
 
-// [NEW] Char
 struct CharExpr : public Expr {
     char value;
     CharExpr(char v) : value(v) {}
     void print() const override { std::cout << "'" << value << "'"; }
 };
 
-// [NEW] Bool
 struct BoolExpr : public Expr {
     bool value;
     BoolExpr(bool v) : value(v) {}
     void print() const override { std::cout << (value ? "true" : "false"); }
+};
+
+struct VariableExpr : public Expr {
+    std::string name;
+    VariableExpr(std::string n) : name(n) {}
+    void print() const override { std::cout << name; }
+};
+
+struct CallExpr : public Expr {
+    std::string func;
+    std::vector<std::unique_ptr<Expr>> args;
+    CallExpr(const std::string& f, std::vector<std::unique_ptr<Expr>> a) : func(f), args(std::move(a)) {}
+    void print() const override { std::cout << func << "(...)"; }
+};
+
+struct MethodCallExpr : public Expr {
+    std::unique_ptr<Expr> object; 
+    std::string method;           
+    std::vector<std::unique_ptr<Expr>> args; 
+    
+    MethodCallExpr(std::unique_ptr<Expr> o, std::string m, std::vector<std::unique_ptr<Expr>> a)
+    : object(std::move(o)), method(m), args(std::move(a)) {}
+    
+    void print() const override {
+        object->print(); std::cout << "." << method << "(...)";
+    }
+};
+
+struct ThisExpr : public Expr {
+    Token keyword;
+    ThisExpr(Token k) : keyword(k) {}
+    void print() const override { std::cout << "this"; }
+};
+
+struct GetExpr : public Expr {
+    std::unique_ptr<Expr> object;
+    std::string name;
+    
+    GetExpr(std::unique_ptr<Expr> obj, std::string n) 
+    : object(std::move(obj)), name(n) {}
+    
+    void print() const override { 
+        object->print(); std::cout << "." << name; 
+    }
+};
+
+struct SetExpr : public Expr {
+    std::unique_ptr<Expr> object;
+    std::string name;
+    std::unique_ptr<Expr> value;
+    
+    SetExpr(std::unique_ptr<Expr> obj, std::string n, std::unique_ptr<Expr> v)
+    : object(std::move(obj)), name(n), value(std::move(v)) {}
+    
+    void print() const override {
+        object->print(); std::cout << "." << name << " = "; value->print();
+    }
+};
+
+struct ArrayExpr : public Expr {
+    std::vector<std::unique_ptr<Expr>> elements;
+    ArrayExpr(std::vector<std::unique_ptr<Expr>> el) : elements(std::move(el)) {}
+    void print() const override { std::cout << "[...]"; }
+};
+
+struct DictExpr : public Expr {
+    std::vector<std::pair<std::unique_ptr<Expr>, std::unique_ptr<Expr>>> pairs;
+    DictExpr(std::vector<std::pair<std::unique_ptr<Expr>, std::unique_ptr<Expr>>> p) 
+        : pairs(std::move(p)) {}
+    void print() const override { std::cout << "{...}"; }
+};
+
+struct IndexExpr : public Expr {
+    std::unique_ptr<Expr> object;
+    std::unique_ptr<Expr> index; 
+    IndexExpr(std::unique_ptr<Expr> o, std::unique_ptr<Expr> i) 
+        : object(std::move(o)), index(std::move(i)) {}
+    void print() const override { 
+        object->print(); 
+        std::cout << "["; index->print(); std::cout << "]"; 
+    }
 };
 
 struct BinaryExpr : public Expr {
@@ -65,15 +132,10 @@ struct BinaryExpr : public Expr {
     BinaryExpr(char o, std::unique_ptr<Expr> l, std::unique_ptr<Expr> r)
         : op(o), lhs(std::move(l)), rhs(std::move(r)) {}
     void print() const override {
-        std::cout << "(";
-        lhs->print();
-        std::cout << " " << op << " ";
-        rhs->print();
-        std::cout << ")";
+        std::cout << "("; lhs->print(); std::cout << " " << op << " "; rhs->print(); std::cout << ")";
     }
 };
 
-// --- STATEMENTS ---
 struct Stmt {
     virtual ~Stmt() = default;
     virtual void print(int indent = 0) = 0;
@@ -81,148 +143,184 @@ struct Stmt {
 
 struct Program {
     std::vector<std::unique_ptr<Stmt>> statements;
-    void print() const {
-        for (auto& stmt : statements) stmt->print(0);
-    }
+    void print() const { for (auto& stmt : statements) stmt->print(0); }
+};
+
+struct ClearStmt : public Stmt {
+    void print(int indent = 0) override { std::cout << std::string(indent, ' ') << "ClearScreen\n"; }
 };
 
 struct SetStmt : public Stmt {
     std::string name;
     std::unique_ptr<Expr> expression;
-    SetStmt(const std::string& n, std::unique_ptr<Expr> e) 
-        : name(n), expression(std::move(e)) {}
-    
+    SetStmt(const std::string& n, std::unique_ptr<Expr> e) : name(n), expression(std::move(e)) {}
     void print(int indent = 0) override {
         std::cout << std::string(indent, ' ') << "Set: " << name << " = ";
-        if (expression) expression->print();
-        std::cout << "\n";
+        if(expression) expression->print(); std::cout << "\n";
     }
 };
 
-// --- CONTROL FLOW (WHILE & IF) ---
-
-// [NEW] While Loop
 struct WhileStmt : public Stmt {
     std::unique_ptr<Expr> condition;
     std::vector<std::unique_ptr<Stmt>> body;
-    
     WhileStmt(std::unique_ptr<Expr> cond) : condition(std::move(cond)) {}
-    
     void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "While: ";
-        if(condition) condition->print();
-        std::cout << "\n";
+        std::cout << std::string(indent, ' ') << "While\n";
         for (auto& s : body) s->print(indent + 2);
     }
 };
 
-// [NEW] If Statement (Else/Elif Support)
 struct IfStmt : public Stmt {
     std::unique_ptr<Expr> condition;
     std::vector<std::unique_ptr<Stmt>> thenBranch;
     std::vector<std::unique_ptr<Stmt>> elseBranch;
-
     IfStmt(std::unique_ptr<Expr> cond) : condition(std::move(cond)) {}
-
     void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "If: ";
-        if(condition) condition->print();
-        std::cout << "\n";
-        
+        std::cout << std::string(indent, ' ') << "If\n";
         for (auto& s : thenBranch) s->print(indent + 2);
-
-        if (!elseBranch.empty()) {
-            std::cout << std::string(indent, ' ') << "Else:\n";
-            for (auto& s : elseBranch) s->print(indent + 2);
-        }
+        if (!elseBranch.empty()) { std::cout << std::string(indent, ' ') << "Else\n"; for (auto& s : elseBranch) s->print(indent + 2); }
     }
 };
 
 struct ForStmt : public Stmt { 
     std::string iteratorName;
-    std::string rangeValue;
+    std::unique_ptr<Expr> collection; 
     std::vector<std::unique_ptr<Stmt>> body;
-    ForStmt(const std::string& iter, const std::string& range) 
-        : iteratorName(iter), rangeValue(range) {}
+
+    ForStmt(const std::string& iter, std::unique_ptr<Expr> col) 
+        : iteratorName(iter), collection(std::move(col)) {}
+        
     void print(int indent = 0) override { 
-        std::cout << std::string(indent, ' ') << "For: " << iteratorName << " in " << rangeValue << "\n";
+        std::cout << std::string(indent, ' ') << "For " << iteratorName << " in Expr\n";
         for(auto& s : body) s->print(indent + 2);
     }
 };
 
-// --- DECLARATIONS ---
+struct FuncDecl : public Stmt {
+    std::string name;
+    std::vector<std::string> params;
+    std::vector<std::unique_ptr<Stmt>> body;
+    FuncDecl(const std::string& n, std::vector<std::string> p) : name(n), params(std::move(p)) {}
+    void print(int indent = 0) override {
+        std::cout << std::string(indent, ' ') << "Func " << name << "\n";
+        for (auto& stmt : body) stmt->print(indent + 2);
+    }
+};
+
+// 4. Deklarasi Class (Cetakan)
+struct ClassDecl : public Stmt {
+    std::string name;
+    std::vector<std::unique_ptr<FuncDecl>> methods; // Class isinya kumpulan fungsi (method)
+
+    ClassDecl(std::string n, std::vector<std::unique_ptr<FuncDecl>> m) 
+    : name(n), methods(std::move(m)) {}
+
+    void print(int indent = 0) override {
+        std::cout << std::string(indent, ' ') << "Class " << name << "\n";
+        for (auto& m : methods) m->print(indent + 2);
+    }
+};
+
+struct CallStmt : public Stmt {
+    std::string func;
+    std::vector<std::unique_ptr<Expr>> args;
+    CallStmt(const std::string& f, std::vector<std::unique_ptr<Expr>> a) : func(f), args(std::move(a)) {}
+    void print(int indent = 0) override {
+        std::cout << std::string(indent, ' ') << "Call " << func << "\n";
+    }
+};
+
+struct UpdateStmt : public Stmt {
+    std::string name;
+    std::string op;
+    UpdateStmt(const std::string& n, const std::string& o) : name(n), op(o) {}
+    void print(int indent = 0) override { std::cout << std::string(indent, ' ') << "Update " << name << "\n"; }
+};
+
+struct PropertyStmt : public Stmt {
+    std::string name;
+    std::string value;
+    PropertyStmt(const std::string& n, const std::string& v) : name(n), value(v) {}
+    void print(int indent = 0) override { std::cout << "Prop " << name << "\n"; }
+};
 
 struct AppDecl : public Stmt {
     std::string name;
     std::vector<std::unique_ptr<Stmt>> body;
     AppDecl(const std::string& n) : name(n) {}
-    void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "App: " << name << "\n";
-        for (auto& stmt : body) stmt->print(indent + 2);
-    }
+    void print(int indent = 0) override { std::cout << "App " << name << "\n"; for (auto& s : body) s->print(indent+2); }
 };
 
 struct WindowDecl : public Stmt {
     std::string name;
     std::vector<std::unique_ptr<Stmt>> body;
     WindowDecl(const std::string& n) : name(n) {}
-    void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "Window: " << name << "\n";
-        for (auto& stmt : body) stmt->print(indent + 2);
-    }
-};
-
-struct FuncDecl : public Stmt {
-    std::string name;
-    std::vector<std::unique_ptr<Stmt>> body;
-    FuncDecl(const std::string& n) : name(n) {}
-    void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "Func: " << name << "\n";
-        for (auto& stmt : body) stmt->print(indent + 2);
-    }
-};
-
-// --- OTHERS ---
-
-struct PropertyStmt : public Stmt {
-    std::string name;
-    std::string value;
-    PropertyStmt(const std::string& n, const std::string& v) : name(n), value(v) {}
-    void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "Property: " << name << " = \"" << value << "\"\n";
-    }
-};
-
-struct CallStmt : public Stmt {
-    std::string func;
-    std::unique_ptr<Expr> argExpr;
-
-    CallStmt(const std::string& f, std::unique_ptr<Expr> a) 
-        : func(f), argExpr(std::move(a)) {}
-    
-    void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "Call: " << func << "(";
-        if (argExpr) argExpr->print();
-        std::cout << ")\n";
-    }
+    void print(int indent = 0) override { std::cout << "Window " << name << "\n"; for (auto& s : body) s->print(indent+2); }
 };
 
 struct ConnectStmt : public Stmt {
-    std::string source;
-    std::string event;
-    std::string target;
-    ConnectStmt(const std::string& s, const std::string& e, const std::string& t)
-        : source(s), event(e), target(t) {}
-    void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "Connect: " << source << "." << event << " -> " << target << "\n";
-    } 
+    std::string source, event, target;
+    ConnectStmt(const std::string& s, const std::string& e, const std::string& t) : source(s), event(e), target(t) {}
+    void print(int indent = 0) override { std::cout << "Connect\n"; }
+};
+
+struct ReturnStmt : public Stmt {
+	std::unique_ptr<Expr> value; 
+	ReturnStmt(std::unique_ptr<Expr> v) : value(std::move(v)) {} 
+	
+	void print(int indent = 0) override {
+		std::cout << std::string(indent, ' ') << "Return "; 
+		std::cout << "\n"; 
+	}
 }; 
 
-struct UpdateStmt : public Stmt {
-    std::string name;
-    std::string op;
-    UpdateStmt(const std::string& n, const std::string& o) : name(n), op(o) {}
+struct ImportStmt : public Stmt { 
+	std::string path; 
+	ImportStmt(std::string p) : path(p) {}
+	
+	void print(int indent = 0) override {
+		std::cout << std::string(indent, ' ') << "Import: " << path << "\n"; 
+	}
+}; 
+
+struct TryStmt : public Stmt {
+    std::vector<std::unique_ptr<Stmt>> tryBody;
+    std::vector<std::unique_ptr<Stmt>> catchBody;
+    std::string errorVar; // Nama variabel untuk menangkap pesan error (misal: "e")
+
+    TryStmt(std::vector<std::unique_ptr<Stmt>> tb, 
+            std::vector<std::unique_ptr<Stmt>> cb, 
+            std::string ev) 
+    : tryBody(std::move(tb)), catchBody(std::move(cb)), errorVar(ev) {}
+
     void print(int indent = 0) override {
-        std::cout << std::string(indent, ' ') << "Update: " << name << op << "\n";
+        std::cout << std::string(indent, ' ') << "Try\n";
+        for (auto& s : tryBody) s->print(indent + 2);
+        std::cout << std::string(indent, ' ') << "Catch (" << errorVar << ")\n";
+        for (auto& s : catchBody) s->print(indent + 2);
+    }
+};
+
+// 5. Ekspresi 'new' (Membuat Instance)
+struct NewExpr : public Expr {
+    std::string className;
+    std::vector<std::unique_ptr<Expr>> args;
+    
+    NewExpr(std::string n, std::vector<std::unique_ptr<Expr>> a) 
+    : className(n), args(std::move(a)) {}
+    
+    void print() const override { std::cout << "new " << className << "(...)"; }
+};
+
+// 6. Expression Statement (Menjalankan ekspresi sebagai statement)
+// Berguna untuk: "r1.jalan()", "this.energi = 5"
+struct ExprStmt : public Stmt {
+    std::unique_ptr<Expr> expression;
+    ExprStmt(std::unique_ptr<Expr> e) : expression(std::move(e)) {}
+    
+    void print(int indent = 0) override { 
+        std::cout << std::string(indent, ' ') << "ExprStmt\n";
+        if(expression) expression->print(); 
+        std::cout << "\n";
     }
 };
