@@ -1,4 +1,4 @@
-
+```text
 ██╗     ██╗███╗   ██╗██╗  ██╗           ██╗      █████╗ ███╗   ██╗ ██████╗ 
 ██║     ██║████╗  ██║██║ ██╔╝           ██║     ██╔══██╗████╗  ██║██╔════╝ 
 ██║     ██║██╔██╗ ██║█████╔╝  █████╗    ██║     ███████║██╔██╗ ██║██║  ███╗
@@ -7,12 +7,13 @@
 ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝           ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
 
 ---------------------------------------------------------------------------
-USER      : Lowis Roy Figo
+Creator   : Pilot0253
+Developer : Lowis Roy Figo
 PROJECT   : LinkLang (Interpreter)
 LANGUAGE  : C++ / Python
 OS        : Kali Linux / Android (Custom Kernel)
 STATUS    : 🚀 Active Development
-
+```
 **Link-Lang** is a dynamic, interpreted programming language built for **NebulaOS**. It features a clean, Python-like syntax based on indentation, designed for simplicity and readability. Built from scratch using C++ (Lexer, Parser, AST, Runtime).
 
 ## ✨ Features
