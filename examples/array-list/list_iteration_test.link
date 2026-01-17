@@ -1,0 +1,9 @@
+set packages = ["vim", "nano", "git"]
+
+# Fast Iteration List
+for pkg in packages
+    print("Installing " + pkg)
+
+# Return Calls Functions
+for i in range(3)
+    print(i)

@@ -4,17 +4,21 @@
 #include <unordered_map>
 
 static const std::unordered_map<std::string, TokenType> keywords = {
-    {"app", TokenType::APP}, {"for", TokenType::FOR}, {"while", TokenType::WHILE},
-    {"if", TokenType::IF}, {"elif", TokenType::ELIF}, {"else", TokenType::ELSE},
-    {"window", TokenType::WINDOW}, {"func", TokenType::FUNC},
-    {"expose", TokenType::EXPOSE}, {"connect", TokenType::CONNECT},
-    {"package", TokenType::PACKAGE}, {"sh", TokenType::SH},
-    {"in", TokenType::IN}, {"set", TokenType::SET},
-    {"true", TokenType::TRUE}, {"false", TokenType::FALSE} // [BARU]
+    {"app", TokenType::APP},            {"for", TokenType::FOR},            {"while", TokenType::WHILE},
+    {"if", TokenType::IF},              {"elif", TokenType::ELIF},          {"else", TokenType::ELSE},
+    {"window", TokenType::WINDOW},      {"func", TokenType::FUNC},          {"return", TokenType::RETURN},  
+    {"expose", TokenType::EXPOSE},      {"connect", TokenType::CONNECT},    {"import", TokenType::IMPORT}, 
+   
+    {"try", TokenType::TRY}, {"catch", TokenType::CATCH},
+    {"class", TokenType::CLASS}, {"init", TokenType::INIT}, {"new", TokenType::NEW}, {"this", TokenType::THIS}, 
+
+    {"package", TokenType::PACKAGE},    {"sh", TokenType::SH},
+    {"in", TokenType::IN},              {"set", TokenType::SET},
+    {"true", TokenType::TRUE},          {"false", TokenType::FALSE}, 
+    {"clear", TokenType::CLEAR},        {"cls", TokenType::CLS} 
 };
 
-Lexer::Lexer(const std::string& source)
-    : src(source), pos(0), line(1), column(1) {
+Lexer::Lexer(const std::string& source) : src(source), pos(0), line(1), column(1) {
     indentStack.push_back(0);
 }
 
@@ -25,8 +29,7 @@ char Lexer::peek() const {
 
 char Lexer::advance() {
     char c = peek();
-    pos++;
-    column++;
+    pos++; column++;
     return c;
 }
 
@@ -41,10 +44,7 @@ Token Lexer::makeToken(TokenType type, const std::string& value) {
 }
 
 void Lexer::skipWhitespace() {
-    while (peek() == ' ' || peek() == '\t') {
-        if (peek() == '\t') {
-            throw std::runtime_error("Tabs are illegal in Link (line " + std::to_string(line) + ")");
-        }
+    while (peek() == ' ' || peek() == '\t' || peek() == '\r') {
         advance();
     }
 }
@@ -52,50 +52,29 @@ void Lexer::skipWhitespace() {
 Token Lexer::identifier() {
     int startCol = column;
     std::string value;
-
-    while (std::isalnum(peek()) || peek() == '_') {
-        value += advance();
-    }
-
+    while (std::isalnum(peek()) || peek() == '_') value += advance();
     auto it = keywords.find(value);
-    if (it != keywords.end()) {
-        return Token{it->second, value, line, startCol};
-    }
-
+    if (it != keywords.end()) return Token{it->second, value, line, startCol};
     return Token{TokenType::IDENTIFIER, value, line, startCol};
 }
 
 Token Lexer::stringLiteral() {
     int startCol = column;
     std::string value;
-
-    advance(); // consume opening quote
-
+    advance(); 
     while (peek() != '"' && peek() != '\0') {
-        if (peek() == '\n') {
-            throw std::runtime_error("Unterminated string literal at line " + std::to_string(line));
-        }
+        if (peek() == '\n') throw std::runtime_error("Unterminated string");
         value += advance();
     }
-
-    if (!match('"')) {
-        throw std::runtime_error("Unterminated string literal at line " + std::to_string(line));
-    }
-
+    if (!match('"')) throw std::runtime_error("Unterminated string");
     return Token{TokenType::STRING, value, line, startCol};
 }
 
 void Lexer::handleIndentation(std::vector<Token>& tokens) {
     int count = 0;
-    while (peek() == ' ') {
-        advance();
-        count++;
-    }
-
+    while (peek() == ' ') { advance(); count++; }
     if (peek() == '\n' || peek() == '\0') return;
-
     int currentIndent = indentStack.back();
-
     if (count > currentIndent) {
         indentStack.push_back(count);
         tokens.push_back(makeToken(TokenType::INDENT));
@@ -105,38 +84,25 @@ void Lexer::handleIndentation(std::vector<Token>& tokens) {
             currentIndent = indentStack.back();
             tokens.push_back(makeToken(TokenType::DEDENT));
         }
-
-        if (count != currentIndent) {
-            throw std::runtime_error(
-                "Invalid indentation at line " + std::to_string(line)
-            );
-        }
+        if (count != currentIndent) throw std::runtime_error("Invalid indentation");
     }
 }
 
 void Lexer::skipComment() {
-    while (peek() != '\n' && peek() != '\0') {
-        advance();
-    }
+    while (peek() != '\n' && peek() != '\0') advance();
 }
 
 Token Lexer::number() {
     int startCol = column;
     std::string value;
     bool isFloat = false;
-
     while (std::isdigit(peek())) value += advance();
-
-    // check point for float -> . in number x/.00
     if (peek() == '.') {
-        isFloat = true;
-        value += advance(); // makan titik
+        isFloat = true; value += advance();
         while (std::isdigit(peek())) value += advance();
     }
-
     return Token{isFloat ? TokenType::TOKEN_FLOAT : TokenType::TOKEN_NUM, value, line, startCol}; 
 }
-
 
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;
@@ -148,56 +114,48 @@ std::vector<Token> Lexer::tokenize() {
         if (std::isalpha(c) || c == '_') { tokens.push_back(identifier()); continue; }
         if (std::isdigit(c)) { tokens.push_back(number()); continue; }
         if (c == '"') { tokens.push_back(stringLiteral()); continue; }
-        
-        if (c == '"') { tokens.push_back(stringLiteral()); continue; }
-         if (c == '\'') {
+        if (c == '\'') {
             int startCol = column;
             std::string value;
-            advance(); // skip opening '
-            while (peek() != '\'' && peek() != '\0') {
-                value += advance();
-            }
-            if (!match('\'')) throw std::runtime_error("Unterminated quote at line " + std::to_string(line));
-            
-            // Logika: Panjang 1 = Char, Selain itu = String
+            advance(); 
+            while (peek() != '\'' && peek() != '\0') value += advance();
+            if (!match('\'')) throw std::runtime_error("Unterminated quote");
             if (value.length() == 1) tokens.push_back(Token{TokenType::CHAR, value, line, startCol});
             else tokens.push_back(Token{TokenType::STRING, value, line, startCol});
             continue;
         }
         
-        // SYMBOLS (Debug Here)
         if (c == '(') { advance(); tokens.push_back(makeToken(TokenType::LPAREN, "(")); continue; }
         if (c == ')') { advance(); tokens.push_back(makeToken(TokenType::RPAREN, ")")); continue; }
+        if (c == '[') { advance(); tokens.push_back(makeToken(TokenType::LBRACKET, "[")); continue; }
+        if (c == ']') { advance(); tokens.push_back(makeToken(TokenType::RBRACKET, "]")); continue; }
         if (c == '{') { advance(); tokens.push_back(makeToken(TokenType::LBRACE, "{")); continue; }
         if (c == '}') { advance(); tokens.push_back(makeToken(TokenType::RBRACE, "}")); continue; }
         if (c == '.') { advance(); tokens.push_back(makeToken(TokenType::DOT, ".")); continue; }
+        if (c == ',') { advance(); tokens.push_back(makeToken(TokenType::COMMA, ",")); continue; }
+        if (c == ':') { advance(); tokens.push_back(makeToken(TokenType::COLON, ":")); continue; }
 
-		// PENTING: Tambahkan string "+", "-", "*", "/" sebagai argumen kedua makeToken
         if (c == '*') { advance(); tokens.push_back(makeToken(TokenType::STAR, "*")); continue; }
         if (c == '/') { advance(); tokens.push_back(makeToken(TokenType::SLASH, "/")); continue; }
-        
-        // Comparator Logic
         if (c == '<') { advance(); tokens.push_back(makeToken(TokenType::LT, "<")); continue; }
         if (c == '>') { advance(); tokens.push_back(makeToken(TokenType::GT, ">")); continue; }
         
-        // Handle '=' or '==' 
         if (c == '=') { 
             advance(); 
             if (match('=')) tokens.push_back(makeToken(TokenType::EQ_EQ, "=="));
             else tokens.push_back(makeToken(TokenType::ASSIGN, "=")); 
             continue; 
         }
-        
         if (c == '+') {
             advance();
             if (match('+')) tokens.push_back(makeToken(TokenType::PLUS_PLUS, "++"));
-            else tokens.push_back(makeToken(TokenType::PLUS, "+")); // Tambahkan "+"
+            else tokens.push_back(makeToken(TokenType::PLUS, "+")); 
             continue;
         }
         if (c == '-') {
             advance();
             if (match('>')) tokens.push_back(makeToken(TokenType::ARROW, "->"));
-            else tokens.push_back(makeToken(TokenType::MINUS, "-")); // Tambahkan "-"
+            else tokens.push_back(makeToken(TokenType::MINUS, "-")); 
             continue;
         }
         throw std::runtime_error("Unknown char: " + std::string(1, c));
@@ -205,4 +163,3 @@ std::vector<Token> Lexer::tokenize() {
     tokens.push_back(makeToken(TokenType::EOF_TOKEN));
     return tokens;
 }
-
