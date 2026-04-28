@@ -7,7 +7,7 @@
 ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝           ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
 
 ---------------------------------------------------------------------------
-Version   : 0.5a (Alpha Release) 
+Version   : 0.5 (Full Release) 
 Creator   : Pilot0253
 Developer : logoro17 // LoRoGo17
 PROJECT   : LinkLang (Interpreter)
@@ -42,7 +42,7 @@ Core Capabilities
     using {} braces (C/Java-style).
   - **Comments:** Use # for single-line comments.
 
-Advanced Features (v0.5a Major Update)
+Advanced Features (v0.5 Major Update)
 
   - **Object-Oriented Programming (OOP):** Full support for class, constructors
     (init), methods, this, and object instantiation (new).
