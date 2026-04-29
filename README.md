@@ -87,7 +87,8 @@ known as the **Penthouse Apps**:
     language support.
 
 Together, these tools form the NebulaOS user environment: a shell, a file manager,
-and an editor all designed to work natively with Link-Lang.
+and an editor all designed to work natively with Link-Lang. The Penthouse Apps are
+available for download at https://nebania.site
 
 Runtime Modes
 
