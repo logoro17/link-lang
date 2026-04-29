@@ -5,13 +5,13 @@
 ██║     ██║██║╚██╗██║██╔═██╗  ╚════╝    ██║     ██╔══██║██║╚██╗██║██║   ██║
 ███████╗██║██║ ╚████║██║  ██╗           ███████╗██║  ██║██║ ╚████║╚██████╔╝
 ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝           ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
-
+============= A Nebania Project =============
 ---------------------------------------------------------------------------
 Version   : 0.5 (Full Release) 
 Creator   : Pilot0253
 Developer : logoro17 // LoRoGo17
 PROJECT   : LinkLang (Interpreter)
-LANGUAGE  : C++ / Python
+LANGUAGE  : C++
 OS        : Linux Distro / Android (Custom Kernel) ARM-v8a
 STATUS    : Active Development
 ```
@@ -61,10 +61,30 @@ Link-Lang now comes with powerful built-in modules:
     text, and handle mouse/keyboard inputs natively.
   - **Audio Engine (audio.):** Stream MP3/WAV music or load multiple Sound Effects
     (SFX) into RAM for game development.
+  - **Networking (net.):** Low-level TCP socket support. Create clients, servers,
+    send/receive data, and scan ports — cross-platform (Linux & Windows).
   - **System & OS (os., io.):** Execute shell commands (os.exec), read/write files,
     and manage environment variables.
   - **Math & Strings (math., str.):** Random number generation, trigonometry, string
     splitting, replacing, and trimming.
+
+The Nebania Ecosystem
+
+Link-Lang is the core of a growing suite of tools built for NebulaOS, collectively
+known as the **Penthouse Apps**:
+
+  - **Bellhop** — A custom shell for NebulaOS. Supports job control, command history,
+    aliases, tab completion, and a Link-Lang plugin system (`.link` scripts as shell
+    extensions).
+  - **Martini** — A terminal-based file manager. Browse the filesystem, open `.link`
+    scripts directly, launch them with `linklang`, and install Bellhop plugins — all
+    from a TUI interface.
+  - **Sucrose** — A terminal text editor with full syntax highlighting for Link-Lang,
+    configurable via a `syntax.link` config file. No recompile needed to add new
+    language support.
+
+Together, these tools form the NebulaOS user environment: a shell, a file manager,
+and an editor all designed to work natively with Link-Lang.
 
 Runtime Modes
 
@@ -88,17 +108,21 @@ on your system.
 ```bash
     sudo apt install libraylib-dev
 ```
-3.  **Compile the source code:** You can use the provided build script:
-    ```bash
-    ./compile-link.sh
-    ```
-    Or manually (Note the -lraylib flag):
-    ```bash
-    g++ -std=c++17 -o link src/*.cpp -I include -lraylib
-    ```
+3.  **Build the project:**
+```bash
+    make          for a standard build
+    make debug    for a build with debug symbols (for development)
+    make release  for an optimized build
+```
+4.  **Optional — install to PATH:**
+```bash
+    sudo make install
+```
+    This copies `linklang` to `/usr/local/bin` so you can run it from anywhere.
+
 Usage
 Running a Script
 **To run a file ending in .link:**
 ```bash
-./link examples/hello.link
+./linklang examples/hello.link
 ```
