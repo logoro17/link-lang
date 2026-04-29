@@ -76,9 +76,12 @@ known as the **Penthouse Apps**:
   - **Bellhop** — A custom shell for NebulaOS. Supports job control, command history,
     aliases, tab completion, and a Link-Lang plugin system (`.link` scripts as shell
     extensions).
+    
   - **Martini** — A terminal-based file manager. Browse the filesystem, open `.link`
-    scripts directly, launch them with `linklang`, and install Bellhop plugins — all
-    from a TUI interface.
+    scripts in Sucrose, or run them with `linklang` directly. The built-in Concierge
+    system analyses `.link` files using a scoring algorithm (`sick.link`) to detect
+    Bellhop plugins and install them on the spot — all from a TUI interface.
+    
   - **Sucrose** — A terminal text editor with full syntax highlighting for Link-Lang,
     configurable via a `syntax.link` config file. No recompile needed to add new
     language support.
