@@ -29,8 +29,7 @@ Core Capabilities
 
   - **Dynamic Typing:** Supports Integer, Float, String, Char, Boolean, Lists
     (Arrays), and Dictionaries.
-  - **Math Engine:** Full support for +, -, *, / with operator precedence (PEMDAS)
-    and parentheses ().
+  - **Math Engine:** Full support for +, -, *, / with operator precedence (PEMDAS).
   - **Logic & Comparison:** Support for >, <, ==, !=, and, or operators.
   - **Control Flow:**
       - if, elif, else conditionals (recursive parsing).
